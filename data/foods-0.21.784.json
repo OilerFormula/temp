@@ -1,0 +1,869 @@
+{
+  "Omniraptor": {
+    "name": "Omniraptor",
+    "location": "Grasslands, Jungles",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Tenontosaurus": {
+    "name": "Tenontosaurus",
+    "location": "Riverdelta, Grasslands, Jungles, Island",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Dryosaurus": {
+    "name": "Dryosaurus",
+    "location": "Grasslands, Riverdelta, Swamp",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Carnotaurus": {
+    "name": "Carnotaurus",
+    "location": "Grasslands",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Stegosaurus": {
+    "name": "Stegosaurus",
+    "location": "Swamps, Highlands",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Hypsilophodon": {
+    "name": "Hypsilophodon",
+    "location": "Jungles, Coastal",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Deinosuchus": {
+    "name": "Deinosuchus",
+    "location": "Water Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Pteranodon": {
+    "name": "Pteranodon",
+    "location": "Coastal, Rivers",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Pachycephalosaurus": {
+    "name": "Pachycephalosaurus",
+    "location": "Coastal",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Crab": {
+    "name": "Crab",
+    "location": "Coastal",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Bullfrog": {
+    "name": "Bullfrog",
+    "location": "Water Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Rabbit": {
+    "name": "Rabbit",
+    "location": "Jungles, Plains",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Boar": {
+    "name": "Boar",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Seaturtle": {
+    "name": "Seaturtle",
+    "location": "Coastal",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Goat": {
+    "name": "Goat",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Chicken": {
+    "name": "Chicken",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Clintonia": {
+    "name": "Clintonia",
+    "location": "Islands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "RedCurrant": {
+    "name": "Red Currant",
+    "location": "Riverdelta",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Trillium": {
+    "name": "Trillium",
+    "location": "Jungles",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "MountainAsh": {
+    "name": "Mountain Ash",
+    "location": "Highlands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "RadishFlower": {
+    "name": "Radish Flower",
+    "location": "Highlands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "RadishRoot": {
+    "name": "Radish Root",
+    "location": "Highlands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "WildPotatoRoot": {
+    "name": "Wild Potato Root",
+    "location": "Riverdelta",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "HornedMelon": {
+    "name": "Horned Melon",
+    "location": "Swamps",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Coconut": {
+    "name": "Coconut",
+    "location": "Coastal, Islands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Agave": {
+    "name": "Agave",
+    "location": "Grasslands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "VariegatedOrange": {
+    "name": "Variegated Orange",
+    "location": "Grasslands, Coastal",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Marigold": {
+    "name": "Marigold",
+    "location": "Jungles, Grasslands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "SunchokeFlowers": {
+    "name": "Sunchoke Flowers",
+    "location": "Grasslands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "SunchokeRoots": {
+    "name": "Sunchoke Roots",
+    "location": "Grasslands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Sumac": {
+    "name": "Sumac",
+    "location": "Swamps",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "EliteFish": {
+    "name": "Elite Fish",
+    "location": "Water Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "ChanterelleMushroom": {
+    "name": "Chanterelle Mushroom",
+    "location": "Swamps",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "SchoolingFish": {
+    "name": "Schooling Fish",
+    "location": "Water Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Mango": {
+    "name": "Mango",
+    "location": "Coastal, Islands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Deer": {
+    "name": "Deer",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Pumpkin": {
+    "name": "Pumpkin",
+    "location": "Grasslands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "WildPotatoVine": {
+    "name": "Wild Potato Vine",
+    "location": "Riverdelta",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Fireweed": {
+    "name": "Fireweed",
+    "location": "Coastal, Highlands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Papaya": {
+    "name": "Papaya",
+    "location": "Jungles",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Dulse": {
+    "name": "Dulse",
+    "location": "Coastal",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Fiddlehead": {
+    "name": "Fiddlehead",
+    "location": "Jungles",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Russula": {
+    "name": "Russula",
+    "location": "Coastal, Swamps",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Brazilnuts": {
+    "name": "Brazilnuts",
+    "location": "Jungles",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Banana": {
+    "name": "Banana",
+    "location": "Jungles",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Cashew": {
+    "name": "Cashew",
+    "location": "Grasslands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Jackfruit": {
+    "name": "Jackfruit",
+    "location": "Jungles",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Beipiaosaurus": {
+    "name": "Beipiaosaurus",
+    "location": "Jungles, Highlands, Water Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Gallimimus": {
+    "name": "Gallimimus",
+    "location": "Highlands, Grasslands",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Diabloceratops": {
+    "name": "Diabloceratops",
+    "location": "Highland , Grassland",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Troodon": {
+    "name": "Troodon",
+    "location": "Coastal, Grasslands, Highlands",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Ceratosaurus": {
+    "name": "Ceratosaurus",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Compsognathus": {
+    "name": "Compsognathus",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Pterodactylus": {
+    "name": "Pterodactylus",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Herrerasaurus": {
+    "name": "Herrerasaurus",
+    "location": "Jungles, Riverdelta",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Dilophosaurus": {
+    "name": "Dilophosaurus",
+    "location": "Grasslands, Jungles",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Psittacosaurus": {
+    "name": "Psittacosaurus",
+    "location": "Highlands, Coastal, Grasslands/Plains",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "CrimsonApollanKTrifolium": {
+    "name": "Crimson Apollan K-Trifolium",
+    "location": "Swamps, Riverdelta",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "AzureApollanKTrifolium": {
+    "name": "Azure Apollan K-Trifolium",
+    "location": "Coastal, Jungles, Riverdelta",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "VioletApollanKTrifolium": {
+    "name": "Violet Apollan K-Trifolium",
+    "location": "Highlands",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "ApollanKRedCurrant": {
+    "name": "Apollan K-RedCurrant",
+    "location": "Riverdelta",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Maiasaura": {
+    "name": "Maiasaura",
+    "location": "Highland, Grassland, Riverdelta",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 0,
+      "lipid": 1
+    },
+    "multiplier": 1.1
+  },
+  "Triceratops": {
+    "name": "Triceratops",
+    "location": "Grassland, Jungle, Highland",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Tyrannosaurus": {
+    "name": "Tyrannosaurus",
+    "location": "All Land Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Clam": {
+    "name": "Clam",
+    "location": "Water Biomes",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Kentrosaurus": {
+    "name": "Kentrosaurus",
+    "location": "Grasslands, Coastal, Highlands",
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Austroraptor": {
+    "name": "Austroraptor",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Oviraptor": {
+    "name": "Oviraptor",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Baryonyx": {
+    "name": "Baryonyx",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "JuvMushroom": {
+    "name": "Sanctuary Mushroom",
+    "location": "Sanctuaries",
+    "kind": "plant",
+    "nutrients": {
+      "carb": 1,
+      "protein": 1,
+      "lipid": 1
+    },
+    "multiplier": 1.5,
+    "juvenileOnly": true
+  },
+  "Allosaurus": {
+    "name": "Allosaurus",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Avaceratops": {
+    "name": "Avaceratops",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 0,
+      "protein": 1,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Camarasaurus": {
+    "name": "Camarasaurus",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Dragonfly": {
+    "name": "Dragonfly",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Grasshopper": {
+    "name": "Grasshopper",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Lizard": {
+    "name": "Lizard",
+    "location": null,
+    "kind": "creature",
+    "nutrients": {
+      "carb": 1,
+      "protein": 0,
+      "lipid": 0
+    },
+    "multiplier": 1.1
+  },
+  "Lungs": {
+    "name": "Lungs",
+    "location": null,
+    "kind": "part"
+  },
+  "Bones": {
+    "name": "Bones",
+    "location": null,
+    "kind": "part"
+  },
+  "Stomach": {
+    "name": "Stomach",
+    "location": null,
+    "kind": "part"
+  },
+  "Heart": {
+    "name": "Heart",
+    "location": null,
+    "kind": "part"
+  },
+  "Intestines": {
+    "name": "Intestines",
+    "location": null,
+    "kind": "part"
+  },
+  "Eggs": {
+    "name": "Eggs",
+    "location": null,
+    "kind": "part"
+  }
+}

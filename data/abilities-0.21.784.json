@@ -1,0 +1,25 @@
+{
+  "source": "https://evrima-viewer.com/assets/index-DfzaClNl.js",
+  "checkedDate": "2026-10-11",
+  "note": "Read as scalar constants; source JavaScript was not executed.",
+  "species": {
+    "Carnotaurus": {
+      "label": "Charge",
+      "provenance": "Measured on a live server: velocity / sprint = 1.200000.",
+      "trigger": "Held secondary attack while sprinting.",
+      "multiplier": 1.2,
+      "staminaPerSec": -0.78,
+      "verified": true
+    },
+    "Tyrannosaurus": {
+      "label": "Ambush",
+      "provenance": "Measured on a live server: velocity / sprint = 1.200002.",
+      "minStage": "SubAdult",
+      "trigger": "Needs speed above 110% of trot.",
+      "multiplier": 1.2,
+      "durationSec": 15,
+      "cooldownSec": 90,
+      "verified": true
+    }
+  }
+}
