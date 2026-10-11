@@ -1,4 +1,4 @@
-# EVRIMA / COMPARE
+# EVRIMA 스탯 비교
 
 The Isle Evrima 공룡 성장 비교 사이트. 빌드 도구나 백엔드 없이 GitHub Pages에서 동작합니다.
 

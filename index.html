@@ -4,41 +4,40 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#141a1c">
-  <meta name="description" content="The Isle Evrima 공룡의 성장별 체중, 달리기, 공격력을 한눈에 비교하세요. 원본 사이트의 최신 데이터를 직접 연결합니다.">
-  <title>EVRIMA / COMPARE — 공룡 성장 비교</title>
+  <meta name="description" content="The Isle Evrima 공룡의 성장별 체중, 달리기, 공격력 비교.">
+  <title>EVRIMA 스탯 비교</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="./" aria-label="Evrima Compare 홈"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 24 10 8l7 11L24 4l5 20" fill="none" stroke="currentColor" stroke-width="3"/></svg><span>EVRIMA <b>/ COMPARE</b></span></a>
+    <a class="brand" href="./" aria-label="Evrima 스탯 비교 홈">EVRIMA 스탯 비교</a>
     <div class="connection"><span id="connection-dot" class="status-dot"></span><span id="connection-status" role="status" aria-live="polite">데이터 불러오는 중…</span></div>
     <button id="refresh" class="button primary" type="button"><span aria-hidden="true">↻</span> 데이터 업데이트</button>
+    <button id="export" class="button secondary" type="button">CSV 내보내기 <span aria-hidden="true">↓</span></button>
   </header>
   <div class="app-layout">
     <aside class="sidebar">
       <div class="sidebar-title"><h2>비교 공룡</h2><span id="selected-count" class="count">0</span></div>
-      <p class="muted small">공룡을 여러 종 선택해 겹쳐 보세요.</p>
-      <label class="search"><span class="sr-only">공룡 검색</span><input id="search" type="search" placeholder="공룡 검색 · Carno, 카르노" autocomplete="off"><span aria-hidden="true">⌕</span></label>
+      <label class="search"><span class="sr-only">공룡 검색</span><input id="search" type="search" placeholder="공룡 검색" autocomplete="off"><span aria-hidden="true">⌕</span></label>
       <div class="sidebar-tools"><label class="check"><input id="unreleased" type="checkbox"> 미출시 포함</label><button id="clear-species" class="text-button" type="button">선택 해제</button></div>
       <div id="species-list" class="species-list" aria-label="공룡 목록"></div>
-      <div class="sidebar-footer"><p>DATA SOURCE</p><a href="https://evrima-viewer.com/" target="_blank" rel="noopener noreferrer">Evrima Viewer ↗</a><span id="source-extracted" class="muted small"></span><p class="muted small note">사이트 제공 수치 기준입니다.<br>자료가 없는 항목은 0으로 표시하지 않습니다.</p></div>
+      <div class="sidebar-footer"><p>데이터 출처</p><a href="https://evrima-viewer.com/" target="_blank" rel="noopener noreferrer">Evrima Viewer ↗</a><span id="source-extracted" class="muted small"></span></div>
     </aside>
     <main>
-      <section class="intro"><div><p class="eyebrow">THE ISLE · GROWTH EXPLORER</p><h1>성장에 따라, 얼마나 달라질까.</h1><p class="muted">공룡을 고르고, 같은 성장률에서 능력치를 비교하세요.</p></div><button id="export" class="button secondary" type="button">CSV 내보내기 <span aria-hidden="true">↓</span></button></section>
+      <h1 class="sr-only">공룡 스탯 비교</h1>
       <div id="notice" class="notice" role="status" hidden></div>
       <section class="controls" aria-label="비교 설정">
         <div class="growth-control"><div class="control-label"><label for="growth">성장률</label><div class="growth-number"><input id="growth-number" aria-label="성장률 숫자" type="number" min="0" max="100" step="0.001" value="55.509"><span>%</span><span id="stage-label" class="stage-label">Sub-Adult</span></div></div><input id="growth" aria-label="성장률 슬라이더" type="range" min="0" max="100" step="0.001" value="55.509"><div class="stage-presets"><button data-growth="0">0%</button><button data-growth="25">25% Juvenile</button><button data-growth="50">50% Sub-Adult</button><button data-growth="75">75% Adult</button><button data-growth="87.5">87.5% Prime</button><button data-growth="100">100%</button></div></div>
         <div class="control-selects"><label>성체 성장 경로<select id="path" aria-label="성체 성장 경로"><option value="prime">Prime Elder</option><option value="frail">Frail Elder</option></select></label><label>데이터 버전<select id="version" aria-label="데이터 버전"></select></label></div>
       </section>
       <div class="chart-stack">
-        <section class="chart-card" id="weight-card" aria-labelledby="weight-title"><div class="chart-header"><div><span class="chart-number">01</span><h2 id="weight-title">체중</h2><span class="unit">kg</span></div><label class="check small"><input id="weight-log" type="checkbox"> 로그 눈금</label></div><div class="chart-filters" id="weight-filters"></div><div class="chart-plot" id="weight-plot"></div><div class="chart-readout" id="weight-readout"></div></section>
-        <section class="chart-card" id="speed-card" aria-labelledby="speed-title"><div class="chart-header"><div><span class="chart-number">02</span><h2 id="speed-title">달리기</h2><span class="unit">km/h</span></div><span class="small muted">점선은 추가 능력</span></div><div class="chart-filters" id="speed-filters"></div><div class="metric-controls" id="speed-metrics"></div><details class="ability-settings"><summary>갈리미무스 능력 설정 · 스태미나 안내</summary><div class="ability-fields"><label>Mobilize·무리 보정 영양소<select id="nutrients"><option value="0">0개</option><option value="1">1개</option><option value="2">2개</option><option value="3" selected>3개</option></select></label><label>무리 리더 속도 (km/h)<input id="leader-speed" type="number" min="0" max="300" step="0.1" placeholder="입력 시 무리 보정 계산"></label></div><p class="muted small">스태미나는 오른쪽 축(/s)을 사용합니다. 원본에 세부 단위가 없어 %/s로 해석하지 않습니다. 일부 공룡에만 자료가 있습니다. 무리 보정은 원본에 영양소별 계수가 있는 경우에만 표시됩니다.</p></details><div class="chart-plot" id="speed-plot"></div><div class="chart-readout" id="speed-readout"></div><div id="ability-notes" class="ability-notes"></div></section>
-        <section class="chart-card" id="attack-card" aria-labelledby="attack-title"><div class="chart-header"><div><span class="chart-number">03</span><h2 id="attack-title">공격력</h2><span class="unit">원본 피해 수치</span></div><span class="small muted">공격 종류별 선택</span></div><div class="chart-filters" id="attack-filters"></div><div class="metric-controls" id="attack-metrics"></div><div class="chart-plot" id="attack-plot"></div><div class="chart-readout" id="attack-readout"></div><p class="chart-footnote">성장별 공격 배율 × 공격 기본값. 상대 체중·방어·상태에 따른 실제 전투 피해는 별도입니다.</p></section>
+        <section class="chart-card" id="weight-card" aria-labelledby="weight-title"><div class="chart-header"><div><h2 id="weight-title">체중</h2><span class="unit">kg</span></div><label class="check small"><input id="weight-log" type="checkbox"> 로그 눈금</label></div><div class="chart-filters" id="weight-filters"></div><div class="chart-plot" id="weight-plot"></div><div class="chart-readout" id="weight-readout"></div></section>
+        <section class="chart-card" id="speed-card" aria-labelledby="speed-title"><div class="chart-header"><div><h2 id="speed-title">달리기</h2><span class="unit">km/h</span></div><span class="small muted">점선은 추가 능력</span></div><div class="chart-filters" id="speed-filters"></div><div class="metric-controls" id="speed-metrics"></div><details class="ability-settings"><summary>갈리미무스 능력 설정 · 스태미나 안내</summary><div class="ability-fields"><label>Mobilize·무리 보정 영양소<select id="nutrients"><option value="0">0개</option><option value="1">1개</option><option value="2">2개</option><option value="3" selected>3개</option></select></label><label>무리 리더 속도 (km/h)<input id="leader-speed" type="number" min="0" max="300" step="0.1" placeholder="입력 시 무리 보정 계산"></label></div><p class="muted small">스태미나는 오른쪽 축(/s)을 사용합니다. 원본에 세부 단위가 없어 %/s로 해석하지 않습니다. 일부 공룡에만 자료가 있습니다. 무리 보정은 원본에 영양소별 계수가 있는 경우에만 표시됩니다.</p></details><div class="chart-plot" id="speed-plot"></div><div class="chart-readout" id="speed-readout"></div><div id="ability-notes" class="ability-notes"></div></section>
+        <section class="chart-card" id="attack-card" aria-labelledby="attack-title"><div class="chart-header"><div><h2 id="attack-title">공격력</h2><span class="unit">원본 피해 수치</span></div></div><div class="chart-filters" id="attack-filters"></div><div class="metric-controls" id="attack-metrics"></div><div class="chart-plot" id="attack-plot"></div><div class="chart-readout" id="attack-readout"></div><p class="chart-footnote">성장별 공격 배율 × 공격 기본값. 상대 체중·방어·상태에 따른 실제 전투 피해는 별도입니다.</p></section>
       </div>
       <section class="snapshot"><div class="snapshot-header"><h2>선택한 성장률의 수치</h2><span id="snapshot-growth" class="muted small"></span></div><div class="table-scroll"><table><thead><tr><th>공룡</th><th>체중 (kg)</th><th>질주 (km/h)</th><th>특수능력 (km/h)</th><th>물기 힘</th><th>스태미나 (/s)</th></tr></thead><tbody id="snapshot-body"></tbody></table></div></section>
       <details class="data-details"><summary>데이터 연결과 표시 기준</summary><p>페이지를 열면 저장된 데이터를 먼저 표시하고 원본 사이트의 최신 버전을 확인합니다. ‘데이터 업데이트’는 버전 목록, 성장 곡선, 추가 능력 보정값을 새로 불러옵니다. 연결에 실패하면 마지막으로 성공한 데이터를 유지합니다.</p><p>75% 이전에는 원본과 동일하게 Frail 곡선을 사용합니다. 이후에는 선택한 Prime/Frail 경로를 사용합니다. 실선은 기본 수치, 점선은 추가 능력입니다. 그래프 위를 움직이거나 누르면 성장률별 수치를 확인할 수 있습니다.</p><p>공룡 식단·특수능력의 일부 수치는 원본 사이트의 서버 측정에 기반합니다. 미출시 공룡 또는 미제공 항목은 ‘자료 없음’으로 표시합니다. 이 도구는 The Isle 및 Evrima Viewer의 공식 제품이 아닙니다.</p><p id="update-details"></p></details>
-      <footer class="page-footer"><span>EVRIMA / COMPARE</span><span>성장 곡선, 나란히 비교하기.</span><a href="https://evrima-viewer.com/" target="_blank" rel="noopener noreferrer">원본 데이터 ↗</a></footer>
     </main>
   </div>
   <noscript>이 비교 도구를 사용하려면 브라우저에서 JavaScript를 활성화해 주세요.</noscript>
