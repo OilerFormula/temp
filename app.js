@@ -1,5 +1,6 @@
 import { COLORS, metricValue, samplePoints, stats } from './engine.js';
 import { SOURCE, bundledData, liveData, readCache, saveCache } from './data-source.js';
+import { TIME_DEFAULTS, validateTimeSettings, validateGrowthData, elapsedMinutes, timeSamples, formatMinutes } from './growth-time.js';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -16,15 +17,19 @@ const SPEED_METRICS = [
   { id:'flock', label:'무리 보정', unit:'km/h', dash:'4 3 1 3' },
   { id:'stamina', label:'스태미나 · 오른쪽 축', unit:'/s', dash:'2 5', secondary:true }
 ];
-const DEFAULTS = { selected:['Carnotaurus','Ceratosaurus','Omniraptor'], growth:55.509, path:'prime', hidden:{weight:[],speed:[],attack:[]}, speedMetrics:['sprint','boosted'], attackMetrics:['bite'], unreleased:false, log:false, nutrients:3, leaderSpeed:null };
+const CHART_NAMES = { time:'성장시간', weight:'체중', speed:'달리기', attack:'공격력' };
+const CHART_IDS = Object.keys(CHART_NAMES);
+const DEFAULTS = { selected:['Carnotaurus','Ceratosaurus','Omniraptor'], growth:55.509, path:'prime', hidden:{time:[],weight:[],speed:[],attack:[]}, time:TIME_DEFAULTS, speedMetrics:['sprint','boosted'], attackMetrics:['bite'], unreleased:false, log:false, nutrients:3, leaderSpeed:null };
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('evrima-compare-view-v1')) ?? {}; } catch {}
 const state = { ...DEFAULTS, ...saved, hidden:{...DEFAULTS.hidden,...saved.hidden} };
+try { state.time=validateTimeSettings({...TIME_DEFAULTS,...saved.time,regions:saved.time?.regions??[]}); } catch { state.time={...TIME_DEFAULTS,regions:[]}; }
 for (const key of ['selected','speedMetrics','attackMetrics']) if (!Array.isArray(state[key])) state[key] = [...DEFAULTS[key]];
-for (const key of ['weight','speed','attack']) if (!Array.isArray(state.hidden[key])) state.hidden[key] = [];
+for (const key of CHART_IDS) if (!Array.isArray(state.hidden[key])) state.hidden[key] = [];
 if (!Number.isFinite(state.growth) || state.growth < 0 || state.growth > 100) state.growth = DEFAULTS.growth;
 if (!['prime','frail'].includes(state.path)) state.path = 'prime';
 let data = null, refreshing = false, savedTimer, cursorFrame;
+let growthTimes=null, growthLoadError='', timeSettingsError='';
 const charts = {};
 const nameOf = name => NAMES[name] ?? name;
 const colorOf = name => {
@@ -33,7 +38,9 @@ const colorOf = name => {
   return COLORS[i] ?? `hsl(${Math.round(i * 137.508) % 360} 65% 72%)`;
 };
 const options = () => ({ nutrients:Number(state.nutrients), leaderSpeed:state.leaderSpeed });
-const saveView = () => { clearTimeout(savedTimer); savedTimer = setTimeout(() => { try { localStorage.setItem('evrima-compare-view-v1', JSON.stringify(state)); } catch {} }, 250); };
+const persistView = () => { try { localStorage.setItem('evrima-compare-view-v1', JSON.stringify(state)); } catch {} };
+const saveView = () => { clearTimeout(savedTimer); savedTimer = setTimeout(persistView,250); };
+window.addEventListener('pagehide',persistView);
 function notice(message, success = false) { $('notice').textContent = message; $('notice').hidden = !message; $('notice').classList.toggle('success', success); }
 function setConnection(message, live = false) { $('connection-status').textContent = message; $('connection-dot').className = `status-dot ${live ? 'live' : 'offline'}`; }
 function availableSpecies() { return Object.keys(data.species).filter(n => state.unreleased || data.species[n].released).sort(); }
@@ -49,17 +56,18 @@ function attackMetrics() {
   return [{ id:'bite', label:'물기 힘', unit:'피해', dash:'' }, ...[...keys].sort().map((key, i) => ({ id:`attack:${key}`, label:ATTACK_NAMES[key] ? `${ATTACK_NAMES[key]} (${key})` : key, unit:'피해', dash:['8 5','3 5','10 3 2 3','6 3 2 3'][i % 4] }))];
 }
 function descriptors(chart) {
+  if (chart === 'time') return [{id:'time',label:'누적 시간',unit:'분',dash:''}];
   if (chart === 'weight') return [{ id:'weight', label:'체중', unit:'kg', dash:'' }];
   if (chart === 'speed') return SPEED_METRICS;
   return attackMetrics();
 }
 function metricsFor(chart) {
   const selected = chart === 'speed' ? state.speedMetrics : state.attackMetrics;
-  return descriptors(chart).filter(m => chart === 'weight' || selected.includes(m.id));
+  return descriptors(chart).filter(m => ['weight','time'].includes(chart) || selected.includes(m.id));
 }
 function renderFilters() {
-  for (const chart of ['weight','speed','attack']) {
-    $(`${chart}-filters`).innerHTML = state.selected.map(n => `<button class="species-chip" type="button" data-chart="${chart}" data-species="${n}" aria-pressed="${!state.hidden[chart].includes(n)}" aria-label="${escape(nameOf(n))} ${chart === 'weight' ? '체중' : chart === 'speed' ? '달리기' : '공격력'} 표시"><span class="color-dot" style="background:${colorOf(n)}"></span>${escape(nameOf(n))}</button>`).join('');
+  for (const chart of CHART_IDS) {
+    $(`${chart}-filters`).innerHTML = state.selected.map(n => `<button class="species-chip" type="button" data-chart="${chart}" data-species="${n}" aria-pressed="${!state.hidden[chart].includes(n)}" aria-label="${escape(nameOf(n))} ${CHART_NAMES[chart]} 표시"><span class="color-dot" style="background:${colorOf(n)}"></span>${escape(nameOf(n))}</button>`).join('');
   }
   for (const chart of ['speed','attack']) {
     const selected = chart === 'speed' ? state.speedMetrics : state.attackMetrics;
@@ -68,10 +76,11 @@ function renderFilters() {
 }
 function makeSeries(chart) {
   const result = [];
+  if (chart==='time' && (!growthTimes || timeSettingsError)) return result;
   for (const n of state.selected) {
     if (state.hidden[chart].includes(n) || !data.species[n]) continue;
     for (const metric of metricsFor(chart)) {
-      const points = samplePoints(data.species[n], data.abilities[n], metric.id, state.path, options());
+      const points = chart==='time' ? timeSamples(growthTimes.species[n],state.time) : samplePoints(data.species[n], data.abilities[n], metric.id, state.path, options());
       if (!points.some(p => p.v != null && Number.isFinite(p.v))) continue;
       result.push({ name:n, metric, points, color:colorOf(n) });
     }
@@ -86,8 +95,8 @@ function niceMax(value) {
 function drawChart(chart) {
   const series = makeSeries(chart), container = $(`${chart}-plot`);
   if (!series.length) {
-    const message = !state.selected.length ? '왼쪽에서 비교할 공룡을 선택하세요.' : !metricsFor(chart).length ? '표시할 세부 항목을 켜 주세요.' : '선택한 항목의 데이터가 없습니다.';
-    container.innerHTML = `<div class="empty-chart"><p>${message}</p><small>공룡과 항목의 표시 버튼을 확인하세요.</small></div>`;
+    const message = chart==='time' && (timeSettingsError || growthLoadError) ? (timeSettingsError || growthLoadError) : !state.selected.length ? '왼쪽에서 비교할 공룡을 선택하세요.' : !metricsFor(chart).length ? '표시할 세부 항목을 켜 주세요.' : '선택한 항목의 데이터가 없습니다.';
+    container.innerHTML = `<div class="empty-chart"><p>${escape(message)}</p><small>공룡과 항목의 표시 버튼을 확인하세요.</small></div>`;
     charts[chart] = null;
     $(`${chart}-readout`).innerHTML = '';
     return;
@@ -105,11 +114,15 @@ function drawChart(chart) {
   const rateLow=rateValues.length ? -niceMax(Math.max(1,...rateValues.map(v=>Math.abs(v))) * 1.05) : -1;
   const x = t=>left+t*width;
   const y = (value, secondary=false)=>secondary ? top+height*(value/rateLow) : log ? top+height*(1-(Math.log10(Math.max(10**minLog,value))-minLog)/(maxLog-minLog)) : top+height*(1-value/max);
-  let markup=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${chart==='weight'?'체중':chart==='speed'?'달리기':'공격력'} 성장 비교 그래프"><title>성장률별 공룡 비교</title><desc>성장률 0~100%. 아래에 선택한 성장률의 숫자 데이터가 있습니다.</desc><defs><clipPath id="clip-${chart}"><rect x="${left}" y="${top}" width="${width}" height="${height}"/></clipPath></defs><rect x="${x(.75)}" y="${top}" width="${width*.25}" height="${height}" fill="#20302a" opacity=".4"/>`;
+  let markup=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${CHART_NAMES[chart]} 성장 비교 그래프"><title>성장률별 공룡 비교</title><desc>성장률 0~100%. 아래에 선택한 성장률의 숫자 데이터가 있습니다.</desc><defs><clipPath id="clip-${chart}"><rect x="${left}" y="${top}" width="${width}" height="${height}"/></clipPath></defs><rect x="${x(.75)}" y="${top}" width="${width*.25}" height="${height}" fill="#20302a" opacity=".4"/>`;
+  if (chart==='time') {
+    for (const region of state.time.regions) markup+=`<rect x="${x(region.from/100)}" y="${top}" width="${width*(region.to-region.from)/100}" height="${height}" fill="#f7ae70" opacity=".05"/><line class="grid" x1="${x(region.from/100)}" x2="${x(region.from/100)}" y1="${top}" y2="${top+height}"/>`;
+    for (const g of [state.time.start,state.time.target]) markup+=`<line class="time-boundary" x1="${x(g/100)}" x2="${x(g/100)}" y1="${top}" y2="${top+height}"/>`;
+  }
   const ticks=log ? Array.from({length:maxLog-minLog+1},(_,i)=>10**(minLog+i)) : Array.from({length:6},(_,i)=>max*i/5);
   for (const tick of ticks) markup+=`<line class="grid" x1="${left}" x2="${W-right}" y1="${y(tick)}" y2="${y(tick)}"/>${values.length?`<text x="${left-12}" y="${y(tick)+4}" text-anchor="end">${format(tick,tick<1?3:1)}</text>`:''}`;
   for (const t of [0,.25,.5,.75,.875,1]) markup+=`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${top+height}"/><text x="${x(t)}" y="${H-23}" text-anchor="middle">${t*100}%</text>`;
-  markup+=`<text class="axis-title" x="${left}" y="13">${!values.length?'':chart==='weight'?'kg'+(log?' · 로그 눈금':''):chart==='speed'?'km/h':'공격 수치'}</text><text class="axis-title" x="${W-right}" y="${H-3}" text-anchor="end">성장률</text><text class="stage-tick" x="${x(.76)}" y="${top+13}">${state.path==='prime'?'PRIME':'FRAIL'} ELDER</text>`;
+  markup+=`<text class="axis-title" x="${left}" y="13">${!values.length?'':chart==='weight'?'kg'+(log?' · 로그 눈금':''):chart==='speed'?'km/h':chart==='time'?'분':'공격 수치'}</text><text class="axis-title" x="${W-right}" y="${H-3}" text-anchor="end">성장률</text><text class="stage-tick" x="${x(.76)}" y="${top+13}">${chart==='time'?'식성 보너스 0%':state.path==='prime'?'PRIME ELDER':'FRAIL ELDER'}</text>`;
   if (rateValues.length) {
     markup+=`<text class="axis-title" x="${W-right+13}" y="13">/s</text>`;
     for (let i=0;i<=4;i++) { const v=rateLow*i/4; markup+=`<text x="${W-right+13}" y="${y(v,true)+4}">${format(v,2)}</text>`; }
@@ -136,9 +149,10 @@ function updateReadout(chart) {
   line.setAttribute('x1',model.x(t));line.setAttribute('x2',model.x(t));
   let dots='',readout='';
   for (const s of model.series) {
-    const v=metricValue(data.species[s.name],data.abilities[s.name],s.metric.id,t,state.path,options());
+    const v=chart==='time' ? elapsedMinutes(growthTimes.species[s.name],state.time.start,t*100,state.time) : metricValue(data.species[s.name],data.abilities[s.name],s.metric.id,t,state.path,options());
     if (v!=null && Number.isFinite(v)) dots+=`<circle class="cursor-point" cx="${model.x(t)}" cy="${model.y(v,s.metric.secondary)}" r="4" fill="${s.color}"/>`;
-    readout+=`<span class="readout-item"><span class="color-dot" style="background:${s.color}"></span><span>${escape(nameOf(s.name))}</span>${chart==='weight'?'':`<small>${escape(s.metric.label)}</small>`}<strong>${format(v,chart==='weight'?3:2)}</strong>${v!=null?`<small>${s.metric.unit}</small>`:''}</span>`;
+    const display=chart==='time' ? (t*100<state.time.start?'시작 이전':formatMinutes(v)) : format(v,chart==='weight'?3:2);
+    readout+=`<span class="readout-item"><span class="color-dot" style="background:${s.color}"></span><span>${escape(nameOf(s.name))}</span>${chart==='weight'||chart==='time'?'':`<small>${escape(s.metric.label)}</small>`}<strong>${display}</strong>${chart!=='time'&&v!=null?`<small>${s.metric.unit}</small>`:''}</span>`;
   }
   $(`${chart}-plot`).querySelector('.cursor-dots').innerHTML=dots;
   $(`${chart}-readout`).innerHTML=readout;
@@ -162,14 +176,16 @@ function renderAbilityNotes() {
 function renderGrowth() {
   $('growth').value=state.growth; $('growth-number').value=Number(state.growth.toFixed(3));
   $('stage-label').textContent=state.growth<25?'Hatchling':state.growth<50?'Juvenile':state.growth<75?'Sub-Adult':'Adult';
-  for (const chart of ['weight','speed','attack']) updateReadout(chart);
+  $('time-cursor-label').textContent=`커서: ${format(state.time.start,3)}% → ${format(state.growth,3)}%`;
+  for (const chart of CHART_IDS) updateReadout(chart);
   renderSnapshot(); saveView();
 }
 function renderAll() {
   if (!data) return;
   state.selected=state.selected.filter(n=>data.species[n]);
   renderSpecies();renderFilters();
-  for (const chart of ['weight','speed','attack']) drawChart(chart);
+  for (const chart of CHART_IDS) drawChart(chart);
+  renderTimeResults();
   renderAbilityNotes();renderGrowth();saveView();
 }
 function applyData(next) {
@@ -219,6 +235,7 @@ $('species-list').addEventListener('change',event=> {
   renderAll();
 });
 $('clear-species').addEventListener('click',()=>{state.selected=[];renderAll();});
+$('all-species').addEventListener('click',()=>{if(data){state.selected=availableSpecies();renderAll();}});
 $('unreleased').checked=state.unreleased;
 $('unreleased').addEventListener('change',event=> {state.unreleased=event.target.checked;if (!state.unreleased && data) state.selected=state.selected.filter(n=>data.species[n]?.released);renderAll();});
 $('path').value=state.path;
@@ -238,6 +255,7 @@ document.querySelector('.chart-stack').addEventListener('click',event=> {
   const {chart,species}=chip.dataset;
   state.hidden[chart]=state.hidden[chart].includes(species)?state.hidden[chart].filter(n=>n!==species):[...state.hidden[chart],species];
   chip.setAttribute('aria-pressed',!state.hidden[chart].includes(species));drawChart(chart);saveView();
+  if (chart==='time') renderTimeResults();
 });
 document.querySelector('.chart-stack').addEventListener('change',event=> {
   const target=event.target;if (!target.dataset.metric || !data) return;
@@ -245,7 +263,7 @@ document.querySelector('.chart-stack').addEventListener('change',event=> {
   state[key]=target.checked?[...new Set([...state[key],target.dataset.metric])]:state[key].filter(n=>n!==target.dataset.metric);
   drawChart(target.dataset.chart);saveView();
 });
-for (const chart of ['weight','speed','attack']) {
+for (const chart of CHART_IDS) {
   const pointToGrowth=event=> {
     if (!charts[chart] || (event.type==='pointermove' && event.pointerType!=='mouse')) return;
     const svg=$(`${chart}-plot`).querySelector('svg'),bounds=svg.getBoundingClientRect(),model=charts[chart];
@@ -264,12 +282,96 @@ $('refresh').addEventListener('click',()=>refresh(undefined));
 $('version').addEventListener('change',event=>refresh(event.target.value));
 $('export').addEventListener('click',exportCsv);
 let resizeTimer;
-window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(data)for(const chart of ['weight','speed','attack'])drawChart(chart);},150);});
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(data)for(const chart of CHART_IDS)drawChart(chart);},150);});
+
+function renderTimeResults() {
+  $('time-target-label').textContent=`${format(state.time.start,3)}% → ${format(state.time.target,3)}%`;
+  const names=state.selected.filter(n=>!state.hidden.time.includes(n));
+  $('time-results').innerHTML=names.length ? names.map(n=>{
+    const value=timeSettingsError ? null : elapsedMinutes(growthTimes?.species[n],state.time.start,state.time.target,state.time);
+    return `<tr><td><span class="color-dot" style="background:${colorOf(n)}"></span>${escape(nameOf(n))}</td><td>${timeSettingsError?'설정 확인':formatMinutes(value)}</td><td>${value===Infinity?'∞':value==null?'—':format(value,2)}</td></tr>`;
+  }).join('') : '<tr><td colspan="3">표시할 공룡을 선택하세요.</td></tr>';
+  $('time-source-summary').textContent=growthTimes ? `기본 시간 · ${growthTimes.sourceName} · ${growthTimes.checkedOn} 확인 · ${Object.keys(growthTimes.species).length}종` : growthLoadError || '성장시간 자료 확인 중…';
+  $('time-source-links').innerHTML=state.selected.map(n=>{
+    const profile=growthTimes?.species[n];
+    return profile ? `<a href="${escape(profile.source)}" target="_blank" rel="noopener noreferrer">${escape(nameOf(n))} ↗ <span>${profile.stageMinutes.join(' / ')}분</span></a>` : `<span>${escape(nameOf(n))} · 자료 없음</span>`;
+  }).join('');
+}
+
+function renderTimeRegions() {
+  $('time-regions').innerHTML=state.time.regions.length ? state.time.regions.map((r,i)=>`<div class="time-region"><label>시작 (%)<input type="number" min="0" max="75" step="any" data-time-row="${i}" data-field="from" aria-label="구간 ${i+1} 시작 성장률" value="${Number.isFinite(r.from)?r.from:''}"></label><label>끝 (%)<input type="number" min="0" max="75" step="any" data-time-row="${i}" data-field="to" aria-label="구간 ${i+1} 끝 성장률" value="${Number.isFinite(r.to)?r.to:''}"></label><label class="region-value-label">${state.time.mode==='bonus'?'추가 보너스':'최종 성장률'} (%)<input type="number" min="0" max="300" step="any" data-time-row="${i}" data-field="bonus" aria-label="구간 ${i+1} 식성 값" value="${Number.isFinite(r.bonus)?r.bonus:''}"></label><button type="button" class="text-button" data-remove-region="${i}" aria-label="구간 ${i+1} 삭제">삭제</button></div>`).join('') : '<p class="small muted region-empty">전체 구간에 기본값 적용</p>';
+}
+
+function changeTimeSettings() {
+  try { validateTimeSettings(state.time); timeSettingsError=''; } catch(error) { timeSettingsError=error.message; }
+  $('time-error').hidden=!timeSettingsError; $('time-error').textContent=timeSettingsError;
+  // The note describes the default (unassigned) bonus, independent of region overrides.
+  const base=state.time.server*(state.time.mode==='bonus'?1+state.time.bonus/100:state.time.bonus/100);
+  $('time-rate-note').textContent=timeSettingsError ? '설정을 확인하세요.' : `미지정 구간 ×${format(base,3)} · 75% 이후 ×${format(state.time.server,3)}${base===0?' · 75% 미만 성장 정지':''}`;
+  $('time-bonus-label').textContent=state.time.mode==='bonus'?'기본 식성 보너스 (%)':'기본 최종 성장률 (%)';
+  if (data) { drawChart('time'); renderTimeResults(); renderGrowth(); }
+  saveView();
+}
+
+const timeInputs={ 'time-server':'server','time-bonus':'bonus','time-start':'start','time-target':'target' };
+for (const [id,key] of Object.entries(timeInputs)) {
+  $(id).value=state.time[key];
+  $(id).addEventListener('input',event=>{state.time[key]=event.target.value===''?NaN:Number(event.target.value);changeTimeSettings();});
+}
+$('time-mode').value=state.time.mode;
+$('time-mode').addEventListener('change',event=>{state.time.mode=event.target.value;renderTimeRegions();changeTimeSettings();});
+document.querySelector('.time-presets').addEventListener('click',event=>{
+  const button=event.target.closest('[data-time-start]');
+  if (!button) return;
+  state.time.start=Number(button.dataset.timeStart); $('time-start').value=state.time.start; changeTimeSettings();
+});
+$('add-time-region').addEventListener('click',()=>{
+  const sorted=[...state.time.regions].sort((a,b)=>a.from-b.from);
+  if (timeSettingsError) { $('time-error').hidden=false;return; }
+  const gaps=[];let cursor=0;
+  for (const row of sorted) {if(row.from>cursor)gaps.push({from:cursor,to:row.from});cursor=Math.max(cursor,row.to);}
+  if(cursor<75)gaps.push({from:cursor,to:75});
+  const preferred=gaps.find(g=>g.to>state.time.start),gap=preferred??gaps[0];
+  if (!gap) { $('time-error').textContent='0~75% 전체 구간이 지정되어 있습니다.';$('time-error').hidden=false;return; }
+  const from=preferred?Math.max(gap.from,state.time.start):gap.from,to=gap.to;
+  state.time.regions.push({from,to,bonus:Number.isFinite(state.time.bonus)?state.time.bonus:0}); renderTimeRegions();changeTimeSettings();
+});
+$('time-regions').addEventListener('input',event=>{
+  const {timeRow,field}=event.target.dataset;if (timeRow===undefined) return;
+  state.time.regions[Number(timeRow)][field]=event.target.value===''?NaN:Number(event.target.value);changeTimeSettings();
+});
+$('time-regions').addEventListener('click',event=>{
+  const button=event.target.closest('[data-remove-region]');if(!button)return;
+  state.time.regions.splice(Number(button.dataset.removeRegion),1);renderTimeRegions();changeTimeSettings();
+});
+$('time-export').addEventListener('click',()=>{
+  if (!data || !growthTimes || timeSettingsError || !state.selected.length) { notice('성장시간 자료와 설정, 공룡 선택을 확인하세요.');return; }
+  const rows=[['baseline_checked','species','start_percent','target_percent','elapsed_minutes','server_multiplier','interpretation','default_diet_percent','bonus_regions']];
+  for (const n of state.selected) {
+    if (state.hidden.time.includes(n)) continue;
+    const points=new Set([...Array.from({length:101},(_,i)=>i),state.time.start,state.time.target,...state.time.regions.flatMap(r=>[r.from,r.to])]);
+    for (const g of [...points].sort((a,b)=>a-b)) if (g>=state.time.start) {
+      const value=elapsedMinutes(growthTimes.species[n],state.time.start,g,state.time);
+      rows.push([growthTimes.checkedOn,n,state.time.start,g,value===Infinity?'Infinity':value??'',state.time.server,state.time.mode,state.time.bonus,JSON.stringify(state.time.regions)]);
+    }
+  }
+  downloadCsv(rows,`evrima-growth-times-${growthTimes.checkedOn}.csv`);
+});
+function downloadCsv(rows,filename) {
+  const csv='\uFEFF'+rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\r\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+renderTimeRegions();changeTimeSettings();
 
 async function start() {
+  const timeLoading=fetch('./data/growth-times.json',{signal:AbortSignal.timeout(12000)}).then(response=>{
+    if(!response.ok)throw new Error('성장시간 기본 자료를 읽지 못했습니다.');return response.json();
+  }).then(snapshot=>{growthTimes=validateGrowthData(snapshot);}).catch(error=>{growthLoadError=`성장시간 자료 연결 실패: ${error.message}`;});
   let initial=readCache();
   if (initial) initial.source='cache';
   else { try { initial=await bundledData(); } catch(error) { notice(`기본 데이터를 읽지 못했습니다. 원본 사이트에 연결합니다. ${error.message}`); } }
+  await timeLoading;
   if (initial) applyData(initial);
   await refresh(undefined,false);
 }

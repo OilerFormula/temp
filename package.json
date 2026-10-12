@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node --test",
     "start": "python -m http.server 4173 --bind 127.0.0.1",
-    "update-data": "node scripts/update-data.mjs"
+    "update-data": "node scripts/update-data.mjs",
+    "update-growth-data": "python scripts/update-growth-data.py"
   }
 }

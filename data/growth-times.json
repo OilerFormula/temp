@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "checkedOn": "2026-10-12",
+  "sourceName": "Evrima Quick Guide",
+  "sourceUrl": "https://www.evrimaquickguide.com",
+  "method": "Community stage baselines at 1x; constant speed within each 25% stage.",
+  "boundaries": [
+    0,
+    25,
+    50,
+    75,
+    100
+  ],
+  "species": {
+    "Allosaurus": {
+      "stageMinutes": [
+        60,
+        120,
+        200,
+        220
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/allosaurus",
+      "diet": "carnivore"
+    },
+    "Beipiaosaurus": {
+      "stageMinutes": [
+        20,
+        40,
+        70,
+        90
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-omnivores/beipiaosaurus",
+      "diet": "omnivore"
+    },
+    "Carnotaurus": {
+      "stageMinutes": [
+        40,
+        90,
+        120,
+        210
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/carnotaurus",
+      "diet": "carnivore"
+    },
+    "Ceratosaurus": {
+      "stageMinutes": [
+        30,
+        60,
+        120,
+        150
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/ceratosaurus",
+      "diet": "carnivore"
+    },
+    "Deinosuchus": {
+      "stageMinutes": [
+        33,
+        200,
+        500,
+        650
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/deinosuchus",
+      "diet": "carnivore"
+    },
+    "Diabloceratops": {
+      "stageMinutes": [
+        45,
+        90,
+        140,
+        190
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/diabloceratops",
+      "diet": "herbivore"
+    },
+    "Dilophosaurus": {
+      "stageMinutes": [
+        20,
+        60,
+        120,
+        160
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/dilophosaurus",
+      "diet": "carnivore"
+    },
+    "Dryosaurus": {
+      "stageMinutes": [
+        20,
+        45,
+        90,
+        110
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/dryosaurus",
+      "diet": "herbivore"
+    },
+    "Gallimimus": {
+      "stageMinutes": [
+        15,
+        80,
+        110,
+        120
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-omnivores/gallimimus",
+      "diet": "omnivore"
+    },
+    "Herrerasaurus": {
+      "stageMinutes": [
+        25,
+        50,
+        110,
+        140
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/herrerasaurus",
+      "diet": "carnivore"
+    },
+    "Hypsilophodon": {
+      "stageMinutes": [
+        20,
+        20,
+        30,
+        40
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/hypsilophodon",
+      "diet": "herbivore"
+    },
+    "Kentrosaurus": {
+      "stageMinutes": [
+        60,
+        100,
+        240,
+        265
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/kentrosaurus",
+      "diet": "herbivore"
+    },
+    "Maiasaura": {
+      "stageMinutes": [
+        30,
+        100,
+        140,
+        150
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/maiasaura",
+      "diet": "herbivore"
+    },
+    "Omniraptor": {
+      "stageMinutes": [
+        25,
+        60,
+        120,
+        150
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/omniraptor",
+      "diet": "carnivore"
+    },
+    "Pachycephalosaurus": {
+      "stageMinutes": [
+        25,
+        50,
+        140,
+        160
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/pachycephalosaurus",
+      "diet": "herbivore"
+    },
+    "Pteranodon": {
+      "stageMinutes": [
+        20,
+        40,
+        90,
+        120
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/pteranodon",
+      "diet": "carnivore"
+    },
+    "Stegosaurus": {
+      "stageMinutes": [
+        45,
+        180,
+        405,
+        445
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/stegosaurus",
+      "diet": "herbivore"
+    },
+    "Tenontosaurus": {
+      "stageMinutes": [
+        20,
+        90,
+        110,
+        120
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/tenontosaurus",
+      "diet": "herbivore"
+    },
+    "Triceratops": {
+      "stageMinutes": [
+        60,
+        200,
+        640,
+        850
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-herbivores/triceratops",
+      "diet": "herbivore"
+    },
+    "Troodon": {
+      "stageMinutes": [
+        20,
+        40,
+        60,
+        70
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/troodon",
+      "diet": "carnivore"
+    },
+    "Tyrannosaurus": {
+      "stageMinutes": [
+        70,
+        613,
+        840,
+        610
+      ],
+      "source": "https://www.evrimaquickguide.com/playables/quick-facts-carnivores/tyrannosaurus",
+      "diet": "carnivore"
+    }
+  },
+  "unavailable": {
+    "Austroraptor": "Reliable stage-time data unavailable; known placeholder figures excluded."
+  }
+}
