@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateStaminaReference,restMultiplier,formatReferenceTime,STAMINA_SOURCES} from '../stamina-reference.js';
+import {validateStaminaReference,restMultiplier,formatReferenceTime,formatReferenceSeconds,referenceDurations,STAMINA_SOURCES} from '../stamina-reference.js';
 const snapshot=JSON.parse(await readFile(new URL('../data/stamina-reference.json',import.meta.url),'utf8'));
 
 test('published stamina snapshot contains complete integer samples and explicit limitations',()=>{
@@ -41,6 +41,16 @@ test('snapshot validation rejects misleading units, invented growth data and dam
     d=>d.species[first].timing.duration='4:60m'
   ]) {
     const invalid=structuredClone(snapshot);mutate(invalid);assert.throws(()=>validateStaminaReference(invalid));
+  }
+});
+test('seconds conversion preserves durations and distinct movement conditions',()=>{
+  assert.equal(formatReferenceSeconds('2:20m'),'140초');
+  assert.equal(formatReferenceSeconds('3:10m'),'190초');
+  assert.deepEqual(referenceDurations('0:15m(land)1m(water)'),[{seconds:15,condition:'land'},{seconds:60,condition:'water'}]);
+  assert.equal(formatReferenceSeconds('3:10m(5:20mLatched)'),'190초 / 320초 (매달림)');
+  for(const value of [null,'2:60m','bad']) {
+    assert.equal(referenceDurations(value),null);
+    assert.equal(formatReferenceSeconds(value),'자료 없음');
   }
 });
 test('missing timing data remains unavailable while valid zero recovery remains zero',()=>{

@@ -4,7 +4,7 @@ import { SOURCE, bundledData, liveData, readCache, saveCache } from './data-sour
 import { TIME_DEFAULTS, validateTimeSettings, validateGrowthData, elapsedMinutes, timeSamples, formatMinutes } from './growth-time.js';
 import {GROWTH_STOPS,pointerGrowth,synchronizedGrowth} from './chart-controls.js';
 import {setupDashboard} from './dashboard.js';
-import {RECOVERY_STATES,loadStaminaReference,restMultiplier,formatReferenceTime} from './stamina-reference.js';
+import {RECOVERY_STATES,loadStaminaReference,restMultiplier,formatReferenceTime,formatReferenceSeconds,referenceDurations} from './stamina-reference.js';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -251,12 +251,17 @@ function renderStamina() {
     return `<tr>${staminaNameCell(name)}${RECOVERY_STATES.map(key=>`<td>${format(profile.regeneration[key],3)}</td>`).join('')}<td class="rest-multiplier">×${format(restMultiplier(profile,seconds),2)}</td><td>×${format(profile.rest.maximum,2)}</td><td>${profile.rest.fullAt}초</td></tr>`;
   }).join(''):`<tr><td colspan="8">${escape(empty)}</td></tr>`;
   const mode=state.stamina.recoveryBuff?1:0;
+  const timingCell=value=>`<td class="stamina-duration"><strong>${escape(formatReferenceSeconds(value))}</strong>${value?`<small>${escape(formatReferenceTime(value))}</small>`:''}</td>`;
+  $('stamina-primary-results').innerHTML=names.length?names.map(name=>{
+    const timing=staminaReference?.species[name]?.timing;
+    return `<tr>${staminaNameCell(name)}${timingCell(timing?.duration)}${timingCell(timing?.resting[mode])}</tr>`;
+  }).join(''):`<tr><td colspan="3">${escape(empty)}</td></tr>`;
   $('stamina-timing-results').innerHTML=names.length?names.map(name=>{
     const timing=staminaReference?.species[name]?.timing;
     return `<tr>${staminaNameCell(name)}${timing?['duration','resting','standing','walking','trotting'].map(key=>`<td>${escape(formatReferenceTime(key==='duration'?timing[key]:timing[key][mode]))}</td>`).join(''):'<td colspan="5" class="missing-reference">자료 없음</td>'}</tr>`;
   }).join(''):`<tr><td colspan="6">${escape(empty)}</td></tr>`;
-  $('stamina-source-summary').textContent=staminaReference?`MyIsleMap · ${staminaReference.checkedOn} 확인 · ${Object.keys(staminaReference.species).length}종`:'스태미나 자료 확인 중…';
-  $('stamina-timing-note').textContent=`별도 커뮤니티 참고 자료${staminaReference?.timingSourceUpdating?' · 원본 갱신 중':''}. 버전·성장 단계 미명시. 지속 시간은 기본값, 회복 시간은 ${mode?'15% 버프':'버프 없음'} 기준입니다.`;
+  $('stamina-source-summary').textContent=staminaReference?`자료 출처 · ${staminaReference.checkedOn} 확인 · 시간표 ${Object.values(staminaReference.species).filter(profile=>profile.timing).length}종 / 회복값 ${Object.keys(staminaReference.species).length}종`:'스태미나 자료 확인 중…';
+  $('stamina-timing-note').textContent=`EQG 참고 자료${staminaReference?.timingSourceUpdating?' · 원본 갱신 중':''}. 버전·성장 단계 미명시. 지속 시간은 기본값, 완전 회복은 ${mode?'15% 버프':'버프 없음'} 상태의 휴식 기준입니다.`;
 }
 async function reloadStamina() {
   try {
@@ -281,10 +286,10 @@ for(const [id,key] of [['stamina-selected','onlySelected'],['stamina-buff','reco
 }
 $('stamina-export').addEventListener('click',()=>{
   if(!staminaReference||!staminaNames().length){notice('회복표 자료와 공룡 선택을 확인하세요.');return;}
-  const rows=[['checked_on','species','unit','standing','walking','trotting','resting','rest_seconds','rest_multiplier','max_rest_multiplier','max_at_seconds']];
+  const rows=[['checked_on','species','duration_seconds_by_condition','full_rest_recovery_seconds_by_condition','recovery_buff_percent','timing_source','base_unit','standing','walking','trotting','resting','rest_seconds','rest_multiplier','max_rest_multiplier','max_at_seconds']];
   for(const name of staminaNames()) {
-    const profile=staminaReference.species[name];
-    rows.push([staminaReference.checkedOn,name,staminaReference.unit,...RECOVERY_STATES.map(key=>profile?.regeneration[key]??''),state.stamina.restSeconds,restMultiplier(profile,state.stamina.restSeconds)??'',profile?.rest.maximum??'',profile?.rest.fullAt??'']);
+    const profile=staminaReference.species[name],timing=profile?.timing;
+    rows.push([staminaReference.checkedOn,name,timing?JSON.stringify(referenceDurations(timing.duration)):'',timing?JSON.stringify(referenceDurations(timing.resting[state.stamina.recoveryBuff?1:0])):'',state.stamina.recoveryBuff?15:0,staminaReference.sources.timings,staminaReference.unit,...RECOVERY_STATES.map(key=>profile?.regeneration[key]??''),state.stamina.restSeconds,restMultiplier(profile,state.stamina.restSeconds)??'',profile?.rest.maximum??'',profile?.rest.fullAt??'']);
   }
   downloadCsv(rows,`evrima-stamina-${staminaReference.checkedOn}.csv`);
 });

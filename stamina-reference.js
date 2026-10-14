@@ -33,10 +33,21 @@ export function restMultiplier(profile,seconds) {
   return profile.rest.samples[seconds];
 }
 
+export function referenceDurations(value) {
+  if(!validTime(value))return null;
+  return [...normalizedTime(value).matchAll(/(\d+)(?::(\d{1,2}))?m(?:\(([A-Za-z]+)\))?/g)].map(([,minutes,seconds,condition])=>({seconds:Number(minutes)*60+Number(seconds??0),condition:condition??null}));
+}
+const conditionLabel=condition=>({land:'육상',water:'수중',Quad:'사족',Biped:'이족',Latched:'매달림'}[condition]??condition);
+
+export function formatReferenceSeconds(value) {
+  const durations=referenceDurations(value);
+  return durations?durations.map(row=>`${row.seconds}초${row.condition?` (${conditionLabel(row.condition)})`:''}`).join(' / '):'자료 없음';
+}
+
 export function formatReferenceTime(value) {
-  if(!validTime(value))return '자료 없음';
-  const labels={land:'육상',water:'수중',Quad:'사족',Biped:'이족',Latched:'매달림'};
-  return [...normalizedTime(value).matchAll(/(\d+)(?::(\d{1,2}))?m(?:\(([A-Za-z]+)\))?/g)].map(([,minutes,seconds,label])=>`${Number(minutes)}분${Number(seconds)?` ${Number(seconds)}초`:''}${label?` (${labels[label]??label})`:''}`).join(' / ');
+  const durations=referenceDurations(value);
+  if(!durations)return '자료 없음';
+  return durations.map(row=>`${Math.floor(row.seconds/60)}분${row.seconds%60?` ${row.seconds%60}초`:''}${row.condition?` (${conditionLabel(row.condition)})`:''}`).join(' / ');
 }
 
 export async function loadStaminaReference() {
