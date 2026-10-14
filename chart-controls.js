@@ -7,9 +7,15 @@ export function pointerGrowth(clientX,clientY,bounds,model) {
   return Math.round((x-model.left)/model.width*100000)/1000;
 }
 export function reorderPanel(order,panel,target) {
-  if(!order.includes(panel)||!order.includes(target)||panel===target)return [...order];
+  if(!order.includes(panel)||!order.includes(target)||panel===target||panel==='settings'||target==='settings')return [...order];
   const result=order.filter(id=>id!==panel);result.splice(result.indexOf(target),0,panel);return result;
 }
 export function normalizeOrder(value,keys) {
-  return [...new Set([...(Array.isArray(value)?value.filter(id=>keys.includes(id)):[]),...keys])];
+  const order=[...new Set([...(Array.isArray(value)?value.filter(id=>keys.includes(id)):[]),...keys])];
+  return keys.includes('settings')?['settings',...order.filter(id=>id!=='settings')]:order;
+}
+export function synchronizedGrowth(value,keys) {
+  const growth=Number(value);
+  if(!Number.isFinite(growth)||growth<0||growth>100)throw new RangeError('성장치는 0~100%입니다.');
+  return Object.fromEntries(keys.map(id=>[id,growth]));
 }

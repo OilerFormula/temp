@@ -1,7 +1,7 @@
 import { COLORS, metricValue, samplePoints, stats } from './engine.js';
 import { SOURCE, bundledData, liveData, readCache, saveCache } from './data-source.js';
 import { TIME_DEFAULTS, validateTimeSettings, validateGrowthData, elapsedMinutes, timeSamples, formatMinutes } from './growth-time.js';
-import {GROWTH_STOPS,pointerGrowth} from './chart-controls.js';
+import {GROWTH_STOPS,pointerGrowth,synchronizedGrowth} from './chart-controls.js';
 import {setupDashboard} from './dashboard.js';
 
 const $ = id => document.getElementById(id);
@@ -21,11 +21,12 @@ const SPEED_METRICS = [
 ];
 const CHART_NAMES = { time:'성장시간', weight:'체중', speed:'달리기', attack:'공격력' };
 const CHART_IDS = Object.keys(CHART_NAMES);
-const DEFAULTS = { selected:['Carnotaurus','Ceratosaurus'], chartGrowth:{time:55.509,weight:55.509,speed:55.509,attack:55.509},panelOrder:[],collapsed:[],path:'prime', hidden:{time:[],weight:[],speed:[],attack:[]}, time:TIME_DEFAULTS, speedMetrics:['sprint','boosted'], attackMetrics:['bite'], unreleased:false, log:false, nutrients:3, leaderSpeed:null };
+const DEFAULTS = { selected:['Carnotaurus','Ceratosaurus'], chartGrowth:{time:55.509,weight:55.509,speed:55.509,attack:55.509},sharedGrowth:55.509,panelOrder:[],collapsed:[],path:'prime', hidden:{time:[],weight:[],speed:[],attack:[]}, time:TIME_DEFAULTS, speedMetrics:['sprint','boosted'], attackMetrics:['bite'], unreleased:false, log:false, nutrients:3, leaderSpeed:null };
 let saved = {};
 try {const current=localStorage.getItem('evrima-compare-view-v2');saved=JSON.parse(current??localStorage.getItem('evrima-compare-view-v1'))??{};if(!current)saved.selected=[...DEFAULTS.selected];} catch {}
 const state = { ...DEFAULTS, ...saved, hidden:{...DEFAULTS.hidden,...saved.hidden} };
 state.chartGrowth=Object.fromEntries(CHART_IDS.map(id=>{const value=saved.chartGrowth?.[id]??saved.growth??DEFAULTS.chartGrowth[id];return[id,Number.isFinite(value)&&value>=0&&value<=100?value:DEFAULTS.chartGrowth[id]];}));
+state.sharedGrowth=Number.isFinite(saved.sharedGrowth)&&saved.sharedGrowth>=0&&saved.sharedGrowth<=100?saved.sharedGrowth:DEFAULTS.sharedGrowth;
 delete state.growth;
 state.collapsed=Array.isArray(saved.collapsed)?saved.collapsed:[];
 state.panelOrder=Array.isArray(saved.panelOrder)?saved.panelOrder:[];
@@ -122,14 +123,17 @@ function drawChart(chart) {
   const rateLow=rateValues.length ? -niceMax(Math.max(1,...rateValues.map(v=>Math.abs(v))) * 1.05) : -1;
   const x = t=>left+t*width;
   const y = (value, secondary=false)=>secondary ? top+height*(value/rateLow) : log ? top+height*(1-(Math.log10(Math.max(10**minLog,value))-minLog)/(maxLog-minLog)) : top+height*(1-value/max);
-  let markup=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${CHART_NAMES[chart]} 성장 비교 그래프"><title>성장률별 공룡 비교</title><desc>성장률 0~100%. 아래에 선택한 성장률의 숫자 데이터가 있습니다.</desc><defs><clipPath id="clip-${chart}"><rect x="${left}" y="${top}" width="${width}" height="${height}"/></clipPath></defs><rect x="${x(.75)}" y="${top}" width="${width*.25}" height="${height}" fill="#20302a" opacity=".4"/>`;
+  let markup=`<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="${CHART_NAMES[chart]} 성장 비교 그래프"><title>성장률별 공룡 비교</title><desc>성장률 0~100%. 아래 눈금의 숫자를 누르면 해당 성장률을 선택합니다.</desc><defs><clipPath id="clip-${chart}"><rect x="${left}" y="${top}" width="${width}" height="${height}"/></clipPath></defs><rect x="${x(.75)}" y="${top}" width="${width*.25}" height="${height}" fill="#20302a" opacity=".4"/>`;
   if (chart==='time') {
     for (const region of state.time.regions) markup+=`<rect x="${x(region.from/100)}" y="${top}" width="${width*(region.to-region.from)/100}" height="${height}" fill="#f7ae70" opacity=".05"/><line class="grid" x1="${x(region.from/100)}" x2="${x(region.from/100)}" y1="${top}" y2="${top+height}"/>`;
     for (const g of [state.time.start,state.time.target]) markup+=`<line class="time-boundary" x1="${x(g/100)}" x2="${x(g/100)}" y1="${top}" y2="${top+height}"/>`;
   }
   const ticks=log ? Array.from({length:maxLog-minLog+1},(_,i)=>10**(minLog+i)) : Array.from({length:6},(_,i)=>max*i/5);
   for (const tick of ticks) markup+=`<line class="grid" x1="${left}" x2="${W-right}" y1="${y(tick)}" y2="${y(tick)}"/>${values.length?`<text x="${left-12}" y="${y(tick)+4}" text-anchor="end">${format(tick,tick<1?3:1)}</text>`:''}`;
-  for (const t of [0,.25,.5,.75,.875,1]) markup+=`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${top+height}"/><text x="${x(t)}" y="${H-23}" text-anchor="middle">${t*100}%</text>`;
+  for (const growth of GROWTH_STOPS) {
+    const t=growth/100,hitWidth=Math.min(50,width*.12);
+    markup+=`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${top+height}"/><g class="growth-axis-stop" role="button" tabindex="0" data-preset-chart="${chart}" data-growth="${growth}" aria-label="${CHART_NAMES[chart]} ${growth}% 선택" aria-pressed="${growth===state.chartGrowth[chart]}"><rect x="${x(t)-hitWidth/2}" y="${H-40}" width="${hitWidth}" height="29" rx="5"/><text x="${x(t)}" y="${H-23}" text-anchor="middle">${growth}%</text></g>`;
+  }
   markup+=`<text class="axis-title" x="${left}" y="13">${!values.length?'':chart==='weight'?'kg'+(log?' · 로그 눈금':''):chart==='speed'?'km/h':chart==='time'?'분':'공격 수치'}</text><text class="axis-title" x="${W-right}" y="${H-3}" text-anchor="end">성장률</text><text class="stage-tick" x="${x(.76)}" y="${top+13}">${chart==='time'?'식성 보너스 0%':state.path==='prime'?'PRIME ELDER':'FRAIL ELDER'}</text>`;
   if (rateValues.length) {
     markup+=`<text class="axis-title" x="${W-right+13}" y="13">/s</text>`;
@@ -280,9 +284,30 @@ document.addEventListener('change',event=> {
   state[key]=target.checked?[...new Set([...state[key],target.dataset.metric])]:state[key].filter(n=>n!==target.dataset.metric);
   drawChart(target.dataset.chart);saveView();
 });
+$('shared-growth-stops').innerHTML=GROWTH_STOPS.map(value=>`<button type="button" data-shared-growth="${value}" style="--stop:${value}%" aria-label="모든 그래프 ${value}% 선택">${value}%</button>`).join('');
+function renderSharedGrowth() {
+  $('shared-growth').value=state.sharedGrowth;
+  $('shared-growth-value').textContent=`${format(state.sharedGrowth,3)}%`;
+  $('shared-growth').setAttribute('aria-valuetext',`${format(state.sharedGrowth,3)}%`);
+  for(const button of document.querySelectorAll('[data-shared-growth]'))button.setAttribute('aria-pressed',String(Number(button.dataset.sharedGrowth)===state.sharedGrowth));
+}
+function selectSharedGrowth(value) {
+  state.chartGrowth=synchronizedGrowth(value,CHART_IDS);state.sharedGrowth=Number(value);
+  renderSharedGrowth();if(data)renderGrowth();else saveView();
+}
+renderSharedGrowth();
+$('shared-growth').addEventListener('input',event=>selectSharedGrowth(event.target.value));
+$('shared-growth-stops').addEventListener('click',event=>{
+  const button=event.target.closest('[data-shared-growth]');if(button)selectSharedGrowth(button.dataset.sharedGrowth);
+});
+document.addEventListener('keydown',event=>{
+  const tick=event.target.closest('.growth-axis-stop');
+  if(!tick||!['Enter',' '].includes(event.key))return;
+  event.preventDefault();tick.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+});
 for (const chart of CHART_IDS) {
   const plot=$(`${chart}-plot`);
-  plot.insertAdjacentHTML('afterend',`<div class="chart-growth-controls"><label>성장치 <input type="number" min="0" max="100" step="0.001" value="${state.chartGrowth[chart]}" data-chart-growth="${chart}" aria-label="${CHART_NAMES[chart]} 성장치"> %</label><div class="growth-presets">${GROWTH_STOPS.map(value=>`<button type="button" data-preset-chart="${chart}" data-growth="${value}" aria-label="${CHART_NAMES[chart]} ${value}% 선택">${value}%</button>`).join('')}</div></div>`);
+  plot.insertAdjacentHTML('afterend',`<div class="chart-growth-controls"><label>성장치 <input type="number" min="0" max="100" step="0.001" value="${state.chartGrowth[chart]}" data-chart-growth="${chart}" aria-label="${CHART_NAMES[chart]} 성장치"> %</label></div>`);
   const hover=event=>{
     const model=charts[chart],svg=plot.querySelector('svg');if(!model||!svg)return;
     const bounds=svg.getBoundingClientRect(),growth=pointerGrowth(event.clientX,event.clientY,bounds,model),label=plot.querySelector('.hover-percent'),group=svg.querySelector('.chart-hover');

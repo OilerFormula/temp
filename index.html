@@ -32,6 +32,7 @@
       <div id="notice" class="notice" role="status" hidden></div>
       <section class="controls" aria-label="비교 설정">
         <div class="control-selects"><label>성체 성장 경로<select id="path" aria-label="성체 성장 경로"><option value="prime">Prime Elder</option><option value="frail">Frail Elder</option></select></label><label>데이터 버전<select id="version" aria-label="데이터 버전"></select></label></div>
+        <div class="shared-growth"><div class="shared-growth-label"><label for="shared-growth">전체 성장치</label><output id="shared-growth-value" for="shared-growth"></output></div><input id="shared-growth" type="range" min="0" max="100" step="0.001" value="55.509" aria-label="모든 그래프 성장치"><div id="shared-growth-stops" class="shared-growth-stops"></div></div>
       </section>
       <nav class="chart-nav" aria-label="그래프 이동"><a href="#time-card">성장시간</a><a href="#weight-card">체중</a><a href="#speed-card">달리기</a><a href="#attack-card">공격력</a></nav>
       <div class="chart-stack">

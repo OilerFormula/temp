@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {GROWTH_STOPS,pointerGrowth,reorderPanel,normalizeOrder} from '../chart-controls.js';
+import {GROWTH_STOPS,pointerGrowth,reorderPanel,normalizeOrder,synchronizedGrowth} from '../chart-controls.js';
 const model={W:900,H:310,left:65,width:800,top:26,height:238};
 const bounds={left:100,top:50,width:450,height:155};
 test('pointer maps scaled SVG coordinates into exact percentage and rejects axes',()=>{
@@ -13,6 +13,19 @@ test('pointer maps scaled SVG coordinates into exact percentage and rejects axes
 });
 test('all six stage buttons retain the exact elder peak',()=>assert.deepEqual(GROWTH_STOPS,[0,25,50,75,87.5,100]));
 test('saved layout order repairs duplicates and unknown panels without losing cards',()=>{
-  assert.deepEqual(normalizeOrder(['weight','missing','weight','time'],['settings','time','weight','speed','attack','snapshot']),['weight','time','settings','speed','attack','snapshot']);
+  assert.deepEqual(normalizeOrder(['weight','missing','weight','time'],['settings','time','weight','speed','attack','snapshot']),['settings','weight','time','speed','attack','snapshot']);
   assert.deepEqual(reorderPanel(['time','weight','speed'],'speed','time'),['speed','time','weight']);
+});
+test('settings cannot be moved or displaced by another panel',()=>{
+  const order=['settings','time','weight','speed'];
+  assert.deepEqual(reorderPanel(order,'settings','weight'),order);
+  assert.deepEqual(reorderPanel(order,'weight','settings'),order);
+  assert.deepEqual(reorderPanel(order,'speed','time'),['settings','speed','time','weight']);
+});
+test('shared selection preserves fractional values and stage checkpoints across every graph',()=>{
+  const keys=['time','weight','speed','attack'];
+  for(const value of [...GROWTH_STOPS,42.137]) {
+    assert.deepEqual(Object.values(synchronizedGrowth(String(value),keys)),keys.map(()=>value));
+  }
+  for(const value of [-1,101,NaN,Infinity,'bad'])assert.throws(()=>synchronizedGrowth(value,keys),RangeError);
 });
