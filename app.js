@@ -1,4 +1,5 @@
-import { COLORS, metricValue, samplePoints, stats } from './engine.js';
+import { metricValue, samplePoints, stats } from './engine.js';
+import {assignSpeciesColors,DEFAULT_SPECIES_COLORS} from './chart-colors.js';
 import { SOURCE, bundledData, liveData, readCache, saveCache } from './data-source.js';
 import { TIME_DEFAULTS, validateTimeSettings, validateGrowthData, elapsedMinutes, timeSamples, formatMinutes } from './growth-time.js';
 import {GROWTH_STOPS,pointerGrowth,synchronizedGrowth} from './chart-controls.js';
@@ -21,10 +22,11 @@ const SPEED_METRICS = [
 ];
 const CHART_NAMES = { time:'성장시간', weight:'체중', speed:'달리기', attack:'공격력' };
 const CHART_IDS = Object.keys(CHART_NAMES);
-const DEFAULTS = { selected:['Carnotaurus','Ceratosaurus'], chartGrowth:{time:55.509,weight:55.509,speed:55.509,attack:55.509},sharedGrowth:55.509,panelOrder:[],collapsed:[],path:'prime', hidden:{time:[],weight:[],speed:[],attack:[]}, time:TIME_DEFAULTS, speedMetrics:['sprint','boosted'], attackMetrics:['bite'], unreleased:false, log:false, nutrients:3, leaderSpeed:null };
+const DEFAULTS = { selected:['Carnotaurus','Ceratosaurus'],colors:{...DEFAULT_SPECIES_COLORS},chartGrowth:{time:55.509,weight:55.509,speed:55.509,attack:55.509},sharedGrowth:55.509,panelOrder:[],collapsed:[],path:'prime', hidden:{time:[],weight:[],speed:[],attack:[]}, time:TIME_DEFAULTS, speedMetrics:['sprint','boosted'], attackMetrics:['bite'], unreleased:false, log:false, nutrients:3, leaderSpeed:null };
 let saved = {};
 try {const current=localStorage.getItem('evrima-compare-view-v2');saved=JSON.parse(current??localStorage.getItem('evrima-compare-view-v1'))??{};if(!current)saved.selected=[...DEFAULTS.selected];} catch {}
 const state = { ...DEFAULTS, ...saved, hidden:{...DEFAULTS.hidden,...saved.hidden} };
+state.colors=saved.colors&&typeof saved.colors==='object'&&!Array.isArray(saved.colors)?saved.colors:{...DEFAULT_SPECIES_COLORS};
 state.chartGrowth=Object.fromEntries(CHART_IDS.map(id=>{const value=saved.chartGrowth?.[id]??saved.growth??DEFAULTS.chartGrowth[id];return[id,Number.isFinite(value)&&value>=0&&value<=100?value:DEFAULTS.chartGrowth[id]];}));
 state.sharedGrowth=Number.isFinite(saved.sharedGrowth)&&saved.sharedGrowth>=0&&saved.sharedGrowth<=100?saved.sharedGrowth:DEFAULTS.sharedGrowth;
 delete state.growth;
@@ -39,12 +41,7 @@ let data = null, refreshing = false, savedTimer, cursorFrame;
 let growthTimes=null, growthLoadError='', timeSettingsError='';
 const charts = {};
 const nameOf = name => NAMES[name] ?? name;
-const colorOf = name => {
-  const seed=['Carnotaurus','Ceratosaurus','Omniraptor'];
-  const list = [...seed, ...Object.keys(data.species).sort().filter(n => !seed.includes(n))];
-  const i = list.indexOf(name);
-  return COLORS[i] ?? `hsl(${Math.round(i * 137.508) % 360} 65% 72%)`;
-};
+const colorOf = name => state.colors[name]??'#a0aeb2';
 const options = () => ({ nutrients:Number(state.nutrients), leaderSpeed:state.leaderSpeed });
 const persistView = () => { try { localStorage.setItem('evrima-compare-view-v2', JSON.stringify(state)); } catch {} };
 const saveView = () => { clearTimeout(savedTimer); savedTimer = setTimeout(persistView,250); };
@@ -201,6 +198,7 @@ function renderGrowth(only=null) {
 function renderAll() {
   if (!data) return;
   state.selected=state.selected.filter(n=>data.species[n]);
+  state.colors=assignSpeciesColors(state.selected,state.colors);
   renderSpecies();renderFilters();
   for (const chart of CHART_IDS) drawChart(chart);
   renderTimeResults();
