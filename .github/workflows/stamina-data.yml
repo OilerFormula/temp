@@ -1,0 +1,58 @@
+name: Update stamina reference
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify reference parser
+        run: python -m unittest discover -s tests -p 'test_stamina*.py'
+      - name: Read and validate stamina sources
+        run: python scripts/update-stamina-data.py
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify reference data and calculations
+        run: node --test
+      - name: Prepare static files
+        run: node scripts/build.mjs
+      - name: Save verified snapshot
+        run: |
+          if ! git diff --quiet -- data/stamina-reference.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/stamina-reference.json
+            git commit -m "Update community stamina reference"
+            git push origin main
+          fi
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

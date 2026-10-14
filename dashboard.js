@@ -1,6 +1,6 @@
 import {normalizeOrder} from './chart-controls.js';
 
-export function setupDashboard({state,chartNames,onSave,onResize}) {
+export function setupDashboard({state,chartNames,panelNames={},onSave,onResize}) {
   const stack=document.querySelector('.chart-stack'),panels=new Map(),animations=new Map();
   const dialog=document.getElementById('chart-dialog');
   let expanded=null,placeholder=null,drag=null,scrollFrame=0;
@@ -9,7 +9,7 @@ export function setupDashboard({state,chartNames,onSave,onResize}) {
   settings.id='settings-card';snapshot.id='snapshot-card';
   stack.prepend(settings);stack.append(snapshot);
   settings.insertAdjacentHTML('afterbegin','<div class="chart-header"><div><h2>설정</h2></div></div>');
-  const titles={settings:'설정',...chartNames,snapshot:'수치 표'};
+  const titles={settings:'설정',...chartNames,...panelNames,snapshot:'수치 표'};
   for(const [id,title] of Object.entries(titles)) {
     const card=document.getElementById(`${id}-card`);if(!card)continue;
     panels.set(id,card);card.dataset.panel=id;card.classList.add('dashboard-card');
@@ -19,7 +19,7 @@ export function setupDashboard({state,chartNames,onSave,onResize}) {
     card.append(body);
     if(id==='snapshot')body.prepend(header.querySelector('#snapshot-growth'));
     const tools=document.createElement('div');tools.className='panel-tools';
-    tools.innerHTML=`${id in chartNames?`<button type="button" class="panel-tool" data-panel-zoom aria-label="${title} 확대보기">확대</button>`:''}<button type="button" class="panel-tool" data-panel-fold aria-controls="${body.id}" aria-label="${title} 접기">접기</button>`;
+    tools.innerHTML=`${id in chartNames||id in panelNames?`<button type="button" class="panel-tool" data-panel-zoom aria-label="${title} 확대보기">확대</button>`:''}<button type="button" class="panel-tool" data-panel-fold aria-controls="${body.id}" aria-label="${title} 접기">접기</button>`;
     header.append(tools);header.classList.add('panel-header');
     if(id!=='settings')header.insertAdjacentHTML('beforebegin',`<button type="button" class="panel-drag-bar drag-handle" aria-label="${title} 박스 이동" title="드래그로 이동 · 방향키로 순서 변경"><span aria-hidden="true"></span></button>`);
     fold(id,state.collapsed.includes(id));

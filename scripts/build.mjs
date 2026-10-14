@@ -5,7 +5,7 @@ import path from 'node:path';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const dist=path.join(root,'dist');
 await mkdir(dist,{recursive:true});
-const browserFiles=['style.css','app.js','boot.js','access.js','dashboard.js','chart-controls.js','chart-colors.js','engine.js','data-source.js','growth-time.js'];
+const browserFiles=['style.css','app.js','boot.js','access.js','dashboard.js','chart-controls.js','chart-colors.js','engine.js','data-source.js','growth-time.js','stamina-reference.js'];
 const hash=createHash('sha256');
 for(const file of browserFiles)hash.update(await readFile(path.join(root,file)));
 const version=hash.digest('hex').slice(0,12),assets=path.join(dist,'assets',version);
