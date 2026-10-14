@@ -64,7 +64,7 @@ export function setupDashboard({state,chartNames,onSave,onResize}) {
       placeholder=document.createElement('div');placeholder.className='panel-placeholder';card.replaceWith(placeholder);
       expanded=card;dialog.append(card);card.classList.add('expanded');
       for(const tool of card.querySelectorAll('[data-panel-fold],.drag-handle'))tool.disabled=true;
-      button.textContent='원래 크기';button.setAttribute('aria-label',`${titles[id]} 확대 보기 닫기`);
+      button.textContent='축소';button.setAttribute('aria-label',`${titles[id]} 축소`);
       dialog.setAttribute('aria-label',`${titles[id]} 확대보기`);dialog.showModal();document.body.classList.add('dialog-open');onResize(id);
     }
   });
