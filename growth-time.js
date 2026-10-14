@@ -1,9 +1,8 @@
-export const TIME_DEFAULTS = { server:1, mode:'bonus', bonus:0, start:25, target:75, regions:[] };
+export const TIME_DEFAULTS = { server:1, bonus:0, start:25, target:75, regions:[] };
 export const TIME_BOUNDARIES = [0,25,50,75,100];
 
 export function validateTimeSettings(settings) {
   if (!Number.isFinite(settings.server) || settings.server <= 0) throw new Error('서버 성장 배율은 0보다 커야 합니다.');
-  if (!['bonus','total'].includes(settings.mode)) throw new Error('성장률 해석을 선택하세요.');
   if (!Number.isFinite(settings.bonus) || settings.bonus < 0 || settings.bonus > 300) throw new Error('식성 값은 0~300%로 입력하세요.');
   if (![settings.start,settings.target].every(v=>Number.isFinite(v) && v>=0 && v<=100) || settings.target < settings.start) throw new Error('시작·목표 성장률은 0~100%, 목표는 시작 이상이어야 합니다.');
   if (!Array.isArray(settings.regions)) throw new Error('구간 설정을 확인하세요.');
@@ -30,7 +29,7 @@ export function timeMultiplier(growthPercent, settings) {
   if (growthPercent >= 75) return settings.server;
   const region=settings.regions.find(row=>growthPercent>=row.from && growthPercent<row.to);
   const value=region?.bonus ?? settings.bonus;
-  return settings.server * (settings.mode==='bonus' ? 1+value/100 : value/100);
+  return settings.server * (1+value/100);
 }
 
 // Integrate every crossed stage and bonus boundary; the 75% cutoff is unconditional.

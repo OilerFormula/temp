@@ -16,8 +16,8 @@ test('baseline covers 21 species and excludes unreliable Austroraptor figures',(
   assert.equal(elapsedMinutes(carno,25,75,settings()),210);
   assert.equal(elapsedMinutes(carno,0,100,settings()),460);
 });
-test('180% total growth and +180% bonus remain distinct',()=>{
-  approx(elapsedMinutes(rex,25,75,settings({server:1.25,mode:'total',bonus:180})),1453/2.25);
+test('diet input is always an additional bonus; legacy mode cannot change it',()=>{
+  approx(elapsedMinutes(rex,25,75,settings({server:1.25,mode:'total',bonus:180})),1453/3.5);
   approx(elapsedMinutes(rex,25,75,settings({server:1.25,bonus:180})),1453/3.5);
 });
 test('75-100% always excludes food bonus and keeps server multiplier',()=>{
@@ -48,9 +48,9 @@ test('arbitrary fractional start/target and 87.5% elder checkpoint work',()=>{
   approx(elapsedMinutes(carno,75,87.5,settings({bonus:300})),105);
   assert.equal(elapsedMinutes(carno,50,50,settings()),0);
 });
-test('zero total growth stops the interval; elder-only intervals still advance',()=>{
+test('zero diet bonus retains baseline growth, including legacy total settings',()=>{
   const config=settings({mode:'total',bonus:0});
-  assert.equal(elapsedMinutes(carno,25,75,config),Infinity);
+  assert.equal(elapsedMinutes(carno,25,75,config),210);
   assert.equal(elapsedMinutes(carno,75,100,config),210);
   assert.equal(elapsedMinutes(carno,25,25,config),0);
   assert.equal(formatMinutes(Infinity),'성장 정지');
